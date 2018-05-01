@@ -1,0 +1,323 @@
+.flex-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.ui-flex-container {
+  display: flex;
+  flex-direction: column;
+  background: #d8e5f0;
+  padding: 10px;
+  width: 350px; 
+}
+
+#progress {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  padding: 10px;
+  width: 100%;
+}
+
+.networkStages {
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  align-items: center;
+  flex: 1 1 auto;
+}
+
+.networkRow {
+  display: block;
+}
+
+#networkVisualization {
+  background: #c9cfd6;
+  min-width: 600px;
+}
+
+
+.updateState {
+  outline: 4px dashed black;
+}
+
+.emitOutput{
+  outline: 4px dashed black;
+}
+
+.square {
+  fill: #fff;
+  stroke: #222;
+}
+
+.circle {
+  fill: none;
+  stroke: #222;
+  stroke-width: 2px;
+}
+
+.plus {
+  stroke: black;
+  stroke-width: 5;
+}
+
+.tanh {
+  font: 16px sans-serif;
+  font-weight: bold;
+  color: black;
+}
+
+.sectionTitle {
+  font: 16px sans-serif;
+  color: #022f40;
+}
+
+.button {
+  background-color: #022f40;
+  color: #f9f9f8;
+  padding: 15px 20px;
+  text-align: center;
+  text-decoration: none;
+  font: 14px sans-serif;
+  border: none;
+  border-radius: 8px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  width: 150px;
+}
+
+#learn {
+  width: 80px;
+}
+
+#clearMelody {
+  width: 80px;
+}
+
+.modelBuilder {
+  width: 100%;
+}
+
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  height: 15px;
+  border-radius: 5px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7; /* Transparency, for mouse-over effect on hover */
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+/* Slider Mouse-over effect */
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #022f40; 
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #022f40;
+  cursor: pointer;
+}
+
+#autoLearnSlider {
+  width: 50px; 
+}
+
+span {
+  font: 14px sans-serif;
+  color: #022f40;
+}
+
+h3 {
+  font: 16px sans-serif;
+  color: #022f40;
+  font-weight: bold;
+}
+
+.value {
+  font: 14px sans-serif;
+  font-weight: bold;
+  color: #70161e;
+}
+
+/* Referenced Google PerformanceRNN code for keyboard */
+#inputKeyboard {
+  display: block;
+  margin-right: auto;
+  margin-left: auto;
+  transform: translate(0,0);
+  width: calc(100% - 20px);
+  height: 100px;
+}
+
+#inputKeyboard .key {
+  position: absolute;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+#inputKeyboard .key {
+  height: calc(100% - 2 * 2px);
+  width: 10px;
+  left: 0;
+  top: 0;
+}
+
+#inputKeyboard .key.black {
+  z-index: 1;
+  height: 50%;
+}
+
+#inputKeyboard .key.black .fill {
+  background-color: #7f7f7f;
+  width: calc(100% - 8px);
+  left: 4px;
+}
+
+#inputKeyboard .key.white {
+  z-index: 0;
+}
+
+#inputKeyboard .key.white .fill {
+  background-color: #e5e5e5;
+}
+
+#inputKeyboard .key .fill {
+  border: 2px solid #d7d7d7;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transition: background-color 0.6s;
+}
+
+#inputKeyboard .key .fill.active {
+  background-color: #fff;
+  transition: background-color 0s;
+}
+
+#inputKeyboard .key .highlight.ai {
+  background-color: #fff;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Referenced Google PerformanceRNN code for keyboard */
+#outputKeyboard {
+  display: block;
+  margin-right: auto;
+  margin-left: auto;
+  transform: translate(0,0);
+  width: calc(100% - 20px);
+  height: 100px;
+}
+
+#outputKeyboard .key {
+  position: absolute;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+#outputKeyboard .key {
+  height: calc(100% - 2 * 2px);
+  width: 10px;
+  left: 0;
+  top: 0;
+}
+
+#outputKeyboard .key.black {
+  z-index: 1;
+  height: 50%;
+}
+
+#outputKeyboard .key.black .fill {
+  background-color: #7f7f7f;
+  width: calc(100% - 8px);
+  left: 4px;
+}
+
+#outputKeyboard .key.white {
+  z-index: 0;
+}
+
+#outputKeyboard .key.white .fill {
+  background-color: #e5e5e5;
+}
+
+#outputKeyboard .key .fill {
+  border: 2px solid #d7d7d7;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transition: background-color 0.6s;
+}
+
+#outputKeyboard .key .fill.active {
+  background-color: #fff;
+  transition: background-color 0s;
+}
+
+#outputKeyboard .key .highlight.ai {
+  background-color: #fff;
+}
+
+.playToggle label {
+  display: block;
+  width: 74px;
+  height: 74px;
+  box-sizing: border-box;
+  border-color: transparent transparent transparent #022f40;
+  border-style: solid;
+  border-width: 37px 0 37px 60px;
+  transition: 100ms all ease;
+  cursor: pointer;
+}
+
+.playToggle input[type="checkbox"] {
+  position: absolute;
+  left: -9999px;
+}
+
+.playToggle input[type="checkbox"]:checked + label {
+  width: 74px;
+  height: 74px;
+  border-style: solid; 
+  border-width: 37px;
+  border-color: #70161e;
+}
+
+#tempoSlider {
+  width: 200px;
+}
+

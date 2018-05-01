@@ -1,0 +1,84 @@
+<html>
+  <head>
+    <title>Music RNN Visualizer</title>
+    <link rel="shortcut icon" href="#" />
+    <link href="style.css", rel="stylesheet" type="text/css">
+    <script src="https://d3js.org/d3.v5.min.js" charset="utf-8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.10.0"></script>
+    <script src="Tone.min.js" charset="utf-8"></script>
+    <script src="keyboard_element.js" charset="utf-8"></script>
+    <script src="vexflow-min.js" charset="utf-8"></script>
+  </head>
+
+  <body>
+    <div class="flex-container">
+      <div id="ui">
+        <div class="ui-flex-container">
+          <div class="modelBuilder">
+            <h3>1. Select a hidden layer size and build the network</h3>
+            <span>Hidden Layer Size:</span>
+            <span id="hiddenLayerValue" class="value"></span>
+            <input type="range" min="2" max="8" value="4" class="slider"
+             id="hiddenLayerSlider">
+            <button type="button" id="build" class="button">Build Model</button>
+          </div>
+          <div class="modelTrainer">
+            <h3>2. Enter a melody for the network to learn</h3>
+            <div id="score"></div>
+            <div id="inputKeyboard" class="hidden"></div>
+            <span>Step-through</span>
+            <input type="range" min="0" max="1" value="0" class="slider"
+             id="autoLearnSlider">
+            <span>Auto</span>
+            <button type="button" id="learn" class="button">Learn</button>
+            <button type="button" id="clearMelody" class="button">Clear</button>
+          </div>
+          <div id="controls">
+            <h3>3. Listen to the network</h3>
+          <!--  <button type="button" id="step" class="button">Play Step</button>-->
+            <div class="playback">
+              <span>Tempo</span>
+              <input type="range" min="20" max="200" value="60" class="slider"
+               id="tempoSlider">
+              <div class="playToggle">
+                <input type="checkbox" value="None" name="check"
+                 id="playToggle" />
+                <label for="playToggle" tabindex=1 ></label>
+              </div> 
+            </div>
+          </div> 
+        </div>
+      </div>
+
+      <div id="networkVisualization">
+        <div id="progress">
+          <div id="loss">
+            <span>Current Loss:</span>
+            <span id="currentLoss" class="value">0</span>
+          </div>
+          <div id="correct">
+            <span>Number Correct:</span>
+            <span id="numCorrect" class="value">0</span>
+          </div>
+          <div id="timeStep">
+            <span>Current Time Step:</span>
+            <span id="currentTimeStep" class="value">0</span>
+          </div>
+          <div id="numUpdates">
+            <span>Number of Training Updates:</span>
+            <span id="currentNumUpdates" class="value">0</span>
+          </div>
+        </div>
+
+        <div class="networkStages" height="800px" width="100%"></div>
+        <div id="outputKeyboard" class="hidden" width="800px"
+         height="200px"></div>
+        <div id="targetScore"></div>
+      </div>
+    <script src="model.js" charset="utf-8"></script>
+    <script src="visualization.js" charset="utf-8"></script>
+    <script src="utils.js" charset="utf-8"></script>
+    <script src="score.js" charset="utf-8"></script>
+    <script src="main.js" charset="utf-8"></script>
+  </body>
+</html>
