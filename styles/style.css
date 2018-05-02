@@ -28,8 +28,28 @@
   flex: 1 1 auto;
 }
 
+.accordion {
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  padding: 8px;
+  width: 100%;
+  font: 16px sans-serif;
+  font-weight: bold;
+  text-align: center;
+  border: none;
+  outline: none;
+  transition: 0.4s;
+}
+
+/* Background color to button when clicked and hovered */
+.active, .accordion:hover {
+  background-color: #ccc;
+}
+
 .networkRow {
-  display: block;
+  display: none;
+  overflow: hidden;
 }
 
 #networkVisualization {

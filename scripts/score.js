@@ -1,7 +1,7 @@
 // Score class
 const VF = Vex.Flow;
 
-class MelodyScore {
+export class MelodyScore {
   constructor(containerId) {
     this.score = document.getElementById(containerId);
     this.renderer = new VF.Renderer(this.score, VF.Renderer.Backends.SVG);
@@ -45,23 +45,22 @@ class MelodyScore {
   // Add a note to the VexFlow staff and re-render
   addNoteToStaff(pitchNum) {
     let pitch = pitchNumbertoStaffNote(pitchNum); 
-    let note = new VF.StaveNote({keys:[pitch.pitchClass + pitch.accidental + '/' + pitch.octave],
-                                duration: 'q',
-                                clef: 'treble'})
-      .setContext(this.context)
+    let note = new VF.StaveNote({
+      keys: [pitch.pitchClass + pitch.accidental + '/' + pitch.octave],
+      duration: 'q',
+      clef: 'treble'
+    }).setContext(this.context)
       .setStave(this.stave);
 
     this.tickContext.addTickable(note);
-    // note.preFormat();
 
     if (pitch.accidental) {
       note.addAccidental(0, new VF.Accidental(pitch.accidental));
-    } else if (pitch.pitchClass == this.lastPitch.pitchClass && this.lastPitch.accidental) {
+    } else if (pitch.pitchClass == this.lastPitch.pitchClass &&
+               this.lastPitch.accidental) {
       note.addAccidental(0, new VF.Accidental('n'));
     }
 
-    // newNote.setStyle({fillStyle: 'blue'});
-    // tickContext.addTickable(note);
     note.preFormat();
     this.notes.push(note);
 
@@ -103,7 +102,7 @@ function pitchNumbertoStaffNote(pitchNum) {
 }
 
 
-class TargetScore {
+export class TargetScore {
   constructor(containerId) {
     this.score = document.getElementById(containerId);
     this.renderer = new VF.Renderer(this.score, VF.Renderer.Backends.SVG);
@@ -127,10 +126,7 @@ class TargetScore {
   }
 
   drawBlankStave() {
-    // Create a stave and clef
     const stave = new VF.Stave(10, 0, 330).addClef('treble');
-    
-    // Draw it
     stave.setContext(this.context).draw();
     
     return stave;
@@ -169,9 +165,14 @@ class TargetScore {
       this.lastPitch = pitch;
     }
     console.log(this.notes);
-    this.voice = new VF.Voice({num_beats: targetNotes.length, beat_value: 4});
+    this.voice = new VF.Voice({
+      num_beats: targetNotes.length,
+      beat_value: 4
+    });
     this.voice.addTickables(this.notes);
-    const formatter = new VF.Formatter().joinVoices([this.voice]).format([this.voice], 200);
+    const formatter = new VF.Formatter()
+        .joinVoices([this.voice])
+        .format([this.voice], 200);
     this.visibleNoteGroup = this.context.openGroup();
 
     this.voice.draw(this.context, this.stave);
@@ -188,8 +189,6 @@ class TargetScore {
       if (noteCorrectProbs[n] > 0.98) { 
         style.fillStyle = 'steelblue'; 
       }
-      // console.log(n, this.notes[n]);
-      // console.log(n, style);
       this.notes[n].setStyle(style);
       notes.push(this.notes[n]);
     }
@@ -197,11 +196,11 @@ class TargetScore {
     // Clear the existing notes
     this.context.svg.removeChild(this.visibleNoteGroup);
 
-    // VF.Formatter.FormatAndDraw(this.context, this.stave, notes, false);
-
     const voice = new VF.Voice({num_beats: notes.length, beat_value: 4});
     voice.addTickables(notes);
-    const formatter = new VF.Formatter().joinVoices([voice]).format([voice], 200);
+    const formatter = new VF.Formatter()
+        .joinVoices([voice])
+        .format([voice], 200);
     this.visibleNoteGroup = this.context.openGroup();
 
     voice.draw(this.context, this.stave);
@@ -210,6 +209,6 @@ class TargetScore {
   }
 }
 
-scaleProbToColor = d3.scaleLinear()
+const scaleProbToColor = d3.scaleLinear()
     .range(['black', '#579848'])
     .domain([0, 1]);

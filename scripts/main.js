@@ -1,54 +1,15 @@
-// Interface
-pitchMapping = {
-  60: 'C4',
-  61: 'Db4',
-  62: 'D4',
-  63: 'Eb4',
-  64: 'E4',
-  65: 'F4',
-  66: 'Gb4',
-  67: 'G4',
-  68: 'Ab4',
-  69: 'A4',
-  70: 'Bb4',
-  71: 'B4',
-  72: 'C5'
-}
+// Music RNN Visualization Main module
 
-function pitchNumberToNote(pitchNum) {
-  return pitchMapping[pitchNum];
-}
+import { ForgetAllGatedRNN } from './model.js';
+import { MelodyScore, TargetScore } from './score.js';
+import { RNNVisualization } from './visualization.js';
+import { pitchNumberToNote } from './utils.js';
 
-function getParameters(rnn, test=false) {
-  params = {}
-  if (test==true) {
-    params.W = tf.randomNormal([4, 4], 0, 1);
-    params.U = tf.randomNormal([4, 3], 0, 1);
-    params.b = tf.randomNormal([4, 1], 0, 1);
-    params.V = tf.randomNormal([3, 4], 0, 1);
-    params.c = tf.randomNormal([3, 1], 0, 1);
-  } else {
-    params.W = rnn.W.clone(); 
-    params.U = rnn.U.clone();
-    params.b = rnn.b.clone();
-    params.V = rnn.V.clone();
-    params.c = rnn.c.clone();
-    params.a = rnn.a.clone();
-    params.forgetGate = rnn.forgetGate.clone();
-  }
-
-  return params;
-}
-
-
-// Main
+// User Interface
+// Build Model
 let internalStateSize;
 let outputVectorSize = 13;
 let learningRate = 0.5;
-
-let synth = new Tone.Synth().toMaster();
-
-// TODO: add initial visualization of weights
 
 const hiddenLayerSlider = document.getElementById('hiddenLayerSlider');
 const hiddenLayerValue = document.getElementById('hiddenLayerValue');
@@ -61,29 +22,34 @@ hiddenLayerSlider.oninput = function() {
 
 let rnn, viz;
 
-const buildButton = document.getElementById('build');
-buildButton.addEventListener('click', function() {
-  let internalStateSize = Number(hiddenLayerSlider.value); 
-  // let outputVectorSize = 13;
-  // let learningRate = 0.5;
-  // Remove existing viz elements
-  d3.select('.networkStages').selectAll('*').remove();
-  rnn = new ForgetAllGatedRNN(internalStateSize, outputVectorSize, learningRate);
-  viz = new RNNVisualization(rnn);
-}, false);
+// const buildButton = document.getElementById('build');
+// buildButton.addEventListener('click', function() {
+document.getElementById('build')
+    .addEventListener('click', function() {
+      let internalStateSize = parseInt(hiddenLayerSlider.value); 
+      // Remove existing Visualization elements
+      d3.select('.networkStages').selectAll('*').remove();
+      // Create new Model and Visualization 
+      rnn = new ForgetAllGatedRNN(
+          internalStateSize, outputVectorSize, learningRate);
+      viz = new RNNVisualization(rnn);
+    }, false);
 
 
-// Model Training
+// ------ Model Training ------
 // Note Entry
+
 // Keyboard
+// Define synth
+let synth = new Tone.Synth().toMaster();
 let targetMelody = [];
 
-score = new MelodyScore('score');
+const score = new MelodyScore('score');
 
 const keyboardContainer = document.querySelector('#inputKeyboard');
 const keyboardInterface = new KeyboardElement(keyboardContainer); 
 
-targetScore = new TargetScore('targetScore');
+const targetScore = new TargetScore('targetScore');
 
 d3.selectAll('.key')
     .on('mousedown', function() { 
@@ -131,7 +97,8 @@ learnButton.addEventListener('click', function() {
     evalProgress = rnn.trainEpoch(targetMelody);
     targetScore.recolorNotesFromProbs(evalProgress.correctProbs);
     console.log(evalProgress);
-    currentLossValue.innerHTML = Math.round(evalProgress.loss * 1000) / 1000;
+    currentLossValue.innerHTML = Math.round(evalProgress.loss * 1000) / 
+                                 1000;
     numCorrectValue.innerHTML = evalProgress.numCorrect; 
     currentTimeStep.innerHTML = parseInt(rnn.time); 
     currentNumUpdates.innerHTML = parseInt(rnn.numTrainingUpdates);
@@ -142,9 +109,11 @@ learnButton.addEventListener('click', function() {
     // We set a ceiling on iterations, to avoid non-terminating loops
     // in cases of non-convergence
     // TODO: Need this to re-render
-    while (evalProgress.minCorrectProbability < targetProb && rnn.time < 5000) {
+    while (evalProgress.minCorrectProbability < targetProb &&
+           rnn.time < 5000) {
       evalProgress = rnn.trainEpoch(targetMelody, targetProb);
-      currentLossValue.innerHTML = Math.round(evalProgress.loss * 1000) / 1000;
+      currentLossValue.innerHTML = Math.round(evalProgress.loss * 1000) /
+                                   1000;
       numCorrectValue.innerHTML = evalProgress.numCorrect; 
       currentTimeStep.innerHTML = parseInt(rnn.time); 
       currentNumUpdates.innerHTML = parseInt(rnn.numTrainingUpdates);
@@ -160,6 +129,8 @@ const tempo = document.getElementById('tempoSlider');
 tempo.oninput = function() {
   Tone.Transport.bpm.value = parseInt(this.value); 
 }
+
+let pitch;
 
 Tone.Transport.schedule(function(time) {
   pitch = viz.visualizeStep();
@@ -181,3 +152,6 @@ play.addEventListener('change', function(e) {
   }
 }, false);
 
+
+// const topButton = document.getElementById('topRowButton');
+// topButton.onclick(showRow(topButton.innerHTML));

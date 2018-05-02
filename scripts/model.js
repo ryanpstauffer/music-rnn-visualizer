@@ -1,7 +1,7 @@
-// Forget-All Gated RNN model
-// Model definition
+// Forget-All Gated RNN model definition
+import { pitchNumberToNote } from './utils.js';
 
-class ForgetAllGatedRNN {
+export class ForgetAllGatedRNN {
   constructor(internalStateSize, outputVectorSize, learningRate) {
     this.internalStateSize = internalStateSize;
     this.outputVectorSize = outputVectorSize;
@@ -85,7 +85,6 @@ class ForgetAllGatedRNN {
     let p = null;
     let t = 0;
 
-    // for (let i = 0; i < 4; i++) {
     for (let i = 0; i < this.loopLength; i++) {
       p = this.step();
       // t = (this.time - 1) % 4 + 1;
@@ -98,7 +97,6 @@ class ForgetAllGatedRNN {
       // to match targets
       // So let's backprop and update!
     let evalProgress = {}; 
-    //if (this.time % 4 == 0) {
     if (this.time % this.loopLength == 0) {
       console.log('TRAINING');
       let gradients = this.calcGradients_(
@@ -115,25 +113,28 @@ class ForgetAllGatedRNN {
       const correctProbsBuf = tf.buffer([targetOutputs.length, 1]);
 
       // TODO: generalize for multiple loop lengths
-      // for (let n = 0; n < 4; n++) {
       for (let n = 0; n < this.loopLength; n++) {
-        correctProbsBuf.set(unrolled.probs[n+1].get(targetOutputs[n], 0), n, 0);
+        correctProbsBuf.set(
+            unrolled.probs[n+1].get(targetOutputs[n], 0), n, 0);
       }
       let correctProbs = correctProbsBuf.toTensor();
       evalProgress.correctProbs = correctProbs.clone().dataSync();
        
       // console.log(evalProgress.correctProbs);
-      evalProgress.minCorrectProbability = Math.min(...evalProgress.correctProbs);
+      evalProgress.minCorrectProbability = Math.min(
+          ...evalProgress.correctProbs);
       console.log('Minimum correct probability: ', 
                   evalProgress.minCorrectProbability);
        
-      evalProgress.correct = evalProgress.correctProbs.map(x => x > targetProb);
-      // console.log(evalProgress.correct);
-      evalProgress.numCorrect = evalProgress.correct.reduce((a, b) => a + b, 0);
-      // console.log('Number correct: ', evalProgress.numCorrect);
+      evalProgress.correct = evalProgress.correctProbs.map(
+          x => x > targetProb);
+      evalProgress.numCorrect = evalProgress.correct.reduce(
+          (a, b) => a + b, 0);
     }
+
     return evalProgress; 
   } 
+
   // Train the network cell until targetProbability is reached.
   // targetOutput: a vector with length that matches loop length.
   trainToCompletion(targetOutputs, targetProb=0.98) {
@@ -168,7 +169,6 @@ class ForgetAllGatedRNN {
 
     const d_nextState = tf.variable(tf.zerosLike(this.internalState));
 
-    //for (let t = 4; t > 0; t--) {
     for (let t = this.loopLength; t > 0; t--) {
       // The gradient w.r.t. output function
       d_logits.assign(
@@ -226,6 +226,7 @@ class ForgetAllGatedRNN {
     return gradients;
   }
 
+
   // Update parameters
   updateParameters_(gradients) {
     this.W.assign(
@@ -250,18 +251,14 @@ class ForgetAllGatedRNN {
     } else {
       this.forgetGate.assign(tf.fill([this.internalStateSize, 1], 1));
     }
-    // const a = this.W.matMul(this.internalState).add(
-    //             this.U.matMul(this.lastOutput)).add(
-    //             this.b);
-    // const forgetGate = (this.time % this.loopLength == 0) ? tf.scalar(0) : tf.scalar(1);
-    // const forgetGate = (this.time % 4 == 0) ? tf.scalar(0) : tf.scalar(1);
-    // if (forgetGate.dataSync() == 0 ) { console.log('FORGET'); } 
     this.internalState.assign(this.a.tanh().mul(this.forgetGate));
   }
+
 
   generateLogits_() {
     return tf.matMul(this.V, this.internalState).add(this.c);
   }
+
 
   printParameters() {
     console.log('W:', this.W.toString());

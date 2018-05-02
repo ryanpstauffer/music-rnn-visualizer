@@ -2,12 +2,12 @@
   <head>
     <title>Music RNN Visualizer</title>
     <link rel="shortcut icon" href="#" />
-    <link href="style.css", rel="stylesheet" type="text/css">
+    <link href="styles/style.css", rel="stylesheet" type="text/css">
     <script src="https://d3js.org/d3.v5.min.js" charset="utf-8"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.10.0"></script>
-    <script src="Tone.min.js" charset="utf-8"></script>
-    <script src="keyboard_element.js" charset="utf-8"></script>
-    <script src="vexflow-min.js" charset="utf-8"></script>
+    <script src="third-party/Tone.min.js" charset="utf-8"></script>
+    <script src="third-party/vexflow-min.js" charset="utf-8"></script>
+    <script src="scripts/keyboard_element.js" charset="utf-8"></script>
   </head>
 
   <body>
@@ -75,10 +75,6 @@
          height="200px"></div>
         <div id="targetScore"></div>
       </div>
-    <script src="model.js" charset="utf-8"></script>
-    <script src="visualization.js" charset="utf-8"></script>
-    <script src="utils.js" charset="utf-8"></script>
-    <script src="score.js" charset="utf-8"></script>
-    <script src="main.js" charset="utf-8"></script>
+    <script src="scripts/main.js" type="module" charset="utf-8"></script>
   </body>
 </html>

@@ -1,6 +1,8 @@
 // Visualization class and support functions
+import { nestedArrayFrom2dTensor, getParameters } from './utils.js';
+ 
 
-class RNNVisualization{
+export class RNNVisualization{
   constructor(rnn) {
     this.rnn = rnn;
 
@@ -27,13 +29,13 @@ class RNNVisualization{
 
     const outputKeyboardContainer = document.querySelector('#outputKeyboard');
     this.outputKeyboard = new KeyboardElement(outputKeyboardContainer);
-    
   }
 
 
   addLinearAlgebraRow(rowName) {
-    const newRow = new NetworkRow(this.networkStages, rowName,
-                                  0, this.yPos, this.squareSize_, this.margin);
+    const newRow = new NetworkRow(
+        this.networkStages, rowName, 0, this.yPos, this.squareSize_,
+        this.margin);
     this.rows.push(newRow); 
 
     return newRow;
@@ -82,7 +84,7 @@ class RNNVisualization{
     this.updateKeyboardProbs(pitchProbMapping);
 
    // TODO: clean up the interaction bn the model, viz and synth
-    return rnn.getLastOutputAsPitch();
+    return this.rnn.getLastOutputAsPitch();
   }
 
   visualizeNetwork(params, hPrev, yPrev, hCurrent) {
@@ -92,9 +94,11 @@ class RNNVisualization{
     let yPos = 0;
     let pos = [];
     let plusSize = 50;
-    let containerHeight = (this.rnn.internalStateSize + 2)  * this.squareSize_;
+    let containerHeight = (this.rnn.internalStateSize + 2) *
+        this.squareSize_;
     let containerWidth = Math.max(
-      this.rnn.internalStateSize + 2, this.rnn.outputVectorSize + 2) * this.squareSize_;
+        this.rnn.internalStateSize + 2,
+        this.rnn.outputVectorSize + 2) * this.squareSize_;
     let yPlus = containerHeight / 2 - plusSize/2; 
     let xPlus = 100 / 2 - plusSize/2; 
 
@@ -104,36 +108,9 @@ class RNNVisualization{
     this.rows[2].updateHeatmaps([params.V, hCurrent, params.c]);
   }
 
-  // Deprecated by new keyboard viz
-  // showOutputProbabilities() {
-    // Output Probabilities
-    // Reset x Position
-    // let outputArray = nestedArrayFrom2dTensor(probs);
-    // let outputElem = createSvgElement('y', this.outputProbs, 0, 0); 
-    // visualizeOutputProbs(outputArray, outputElem);
-    //   
-    // containerWidth = this.squareSize_;
-    // containerHeight = rnn.outputVectorSize * this.squareSize_;
-    // 
-    // // Set the container dimensions to the total width and height 
-    // // of the visualation elements it contains
-    // // Center it horizontally within the containing section
-    // this.outputProbs.attr('width', containerWidth)
-    //   .attr('height', containerHeight)
-    //   .attr('transform',
-    //     'translate(' + (this.totalWidth_/2 - containerWidth/2)
-    //     + ',' + (this.sectionHeight_*2 + this.titleMargin_) + ')');
-    // 
-  //}
-
-
-  // createLinearAlgebraRow() {
-  // 
-  // }
-
 
   setupUpdateState(params, hPrev, yPrev) {
-      // Weight matrix W
+    // Weight matrix W
     let numPaddingSquares = 1;
     // let xInitial = pad(numPaddingSquares, 0); 
     // let yInitial = pad(numPaddingSquares, 0);
@@ -143,59 +120,55 @@ class RNNVisualization{
     let plusSize = 50;
     let containerHeight = (this.rnn.internalStateSize + 2)  * this.squareSize_;
     let containerWidth = Math.max(
-      this.rnn.internalStateSize + 2, this.rnn.outputVectorSize + 2) * this.squareSize_;
+        this.rnn.internalStateSize + 2,
+        this.rnn.outputVectorSize + 2) * this.squareSize_;
     let yPlus = containerHeight / 2 - plusSize/2; 
     let xPlus = 100 / 2 - plusSize/2; 
 
     // First row (Weights + bias) 
-    const topRow = this.addLinearAlgebraRow('topRow');
+    const topRow = this.addLinearAlgebraRow('Update State: Affine Transformation');
 
     pos = topRow.addTensorHeatmap(params.W, 'W');
-    // topRow.padX(numPaddingSquares);
 
     pos[0] += this.squareSize_;
     pos = topRow.addTensorHeatmap(hPrev, 'hPrev', [pos[0], 0]);
-    // topRow.padX(numPaddingSquares);
 
     pos[0] += this.squareSize_;
     let plusYPos = (this.rnn.internalStateSize + 2)/2 * this.squareSize_ - plusSize/2;
     pos = topRow.addPlus(50, 10, [pos[0], plusYPos]);
     pos[0] += this.squareSize_;
-    // topRow.padX(numPaddingSquares);
  
     let yPrevStart = pos[0];
     pos = topRow.addTensorHeatmap(yPrev, 'yPrev', [yPrevStart, 0], true);
-    // topRow.padY(numPaddingSquares);
 
     pos[1] += this.squareSize_;
     pos = topRow.addTensorHeatmap(params.U, 'U', [yPrevStart, pos[1]]);
-    // topRow.padX(numPaddingSquares);
     let innerHeight = pos[1];
 
     // Reset y and continue;
     pos[0] += this.squareSize_;
     pos = topRow.addPlus(50, 10, [pos[0], plusYPos]);
     pos[0] += this.squareSize_;
-    // topRow.padX(numPaddingSquares);
     
     pos = topRow.addTensorHeatmap(params.b, 'b', [pos[0], 0]);
 
     let innerWidth = pos[0];
     topRow.updateDimensions(innerWidth, innerHeight);
 
-    const nextRow = this.addLinearAlgebraRow('tanh+forget');
-    pos = [0,0]
+    const nextRow = this.addLinearAlgebraRow('Update State: Activation');
+    pos = [0,0];
     let ySymbol = this.rnn.internalStateSize * this.squareSize_ / 2;
     pos = nextRow.addText('tanh', [0, ySymbol + 8]);
     pos = nextRow.addTensorHeatmap(params.a, 'a', [pos[0], 0]);
-    nextRow.padX(numPaddingSquares);
+    // nextRow.padX(numPaddingSquares);
 
     pos[0] += this.squareSize_;
     pos = nextRow.addHadamard(8, [pos[0], ySymbol - 8]);
-    nextRow.padX(numPaddingSquares);
+    // nextRow.padX(numPaddingSquares);
     pos[0] += this.squareSize_;
 
-    pos = nextRow.addTensorHeatmap(params.forgetGate, 'forgetGate', [pos[0], 0])
+    pos = nextRow.addTensorHeatmap(
+        params.forgetGate, 'forgetGate', [pos[0], 0]);
     nextRow.updateDimensions(pos[0], pos[1]);
   }
 
@@ -207,29 +180,30 @@ class RNNVisualization{
     let yPos = 0;
     let pos = [0, 0];
     // We technically don't have to recalc this!
-    let containerHeight = Math.max(rnn.internalStateSize, rnn.outputVectorSize) * this.squareSize_;
+    let containerHeight = Math.max(
+        this.rnn.internalStateSize, this.rnn.outputVectorSize) * this.squareSize_;
     let plusSize = 50;
     let yPlus = containerHeight / 2 - plusSize/2; 
     let xPlus = 100 / 2 - plusSize/2; 
    
     // First row (Weights + bias) 
-    const emitRow = this.addLinearAlgebraRow('emitRow');
+    const emitRow = this.addLinearAlgebraRow('Emit Output');
 
     pos = emitRow.addTensorHeatmap(params.V, 'V', pos, true);
-    emitRow.padX(numPaddingSquares);
+    // emitRow.padX(numPaddingSquares);
 
     pos[0] += this.squareSize_;
     pos = emitRow.addTensorHeatmap(hCurrent, 'hCurrent', [pos[0], 0]);
-    emitRow.padY(numPaddingSquares);
+    // emitRow.padY(numPaddingSquares);
    
     let innerWidth = pos[0]; 
-    emitRow.xPos = emitRow.xPos / 2;
+    // emitRow.xPos = emitRow.xPos / 2;
 
     pos[1] += this.squareSize_;
     let plusXPos = (this.rnn.outputVectorSize + 2) *
                    this.squareSize_ / 2 - plusSize/2;
     pos = emitRow.addPlus(50, 10, [plusXPos, pos[1]]);
-    emitRow.padY(numPaddingSquares);
+    // emitRow.padY(numPaddingSquares);
 
     emitRow.xPos = 0;
     pos[1] += this.squareSize_;
@@ -243,11 +217,10 @@ class RNNVisualization{
   // Using a mapping of pitchNumber: prob to update
   // The keyboard visualization
   updateKeyboardProbs(pitchProbMapping) {
-    // console.log(pitchProbMapping);
     let keyColor = '#fff';
     for (let n = 60; n < 73; n++) {
       keyColor = float2grayscale(pitchProbMapping[n]); 
-      this.outputKeyboard.keys[n].children[0].style.backgroundColor=keyColor;
+      this.outputKeyboard.keys[n].children[0].style.backgroundColor = keyColor;
     }
   }
 
@@ -261,14 +234,12 @@ function float2grayscale(percentage) {
   return '#' + colorPartHex + colorPartHex + colorPartHex;
 }
 
-scaleWeightToColor = d3.scaleLinear()
+const scaleWeightToColor = d3.scaleLinear()
     .range(['#70161e', '#f9f9f8', '#022f40'])
     .domain([-2, 0, 2]);
-// Should we add domain after data is loaded ?
 
 function updateMatrix(array2d, svgElement) {
   let newColor;
-
   let row = svgElement.selectAll('.row')
       .data(array2d);
   
@@ -277,11 +248,11 @@ function updateMatrix(array2d, svgElement) {
       // Update old data
       // Stand-in for testing
       .style('fill', function(d) { 
-        console.log('updating fill', d);
-        newColor = scaleWeightToColor(d);
-        console.log(newColor);
-        return newColor; });
-        //return scaleWeightToColor(d); });
+        // console.log('updating fill', d);
+        // newColor = scaleWeightToColor(d);
+        // console.log(newColor);
+        // return newColor; });
+        return scaleWeightToColor(d); });
 }
 
 function visualizeMatrix(array2d, svgElement, squareSize=30) {
@@ -357,7 +328,8 @@ class TensorHeatmap {
 
 // Returns position of bottom right corner
 function visualizeTensorHeatmap(
-  tensor, tensorName, containerElem, xPos, yPos, squareSize=30, transpose=false) {
+    tensor, tensorName, containerElem, xPos, yPos, squareSize=30,
+    transpose=false) {
   // console.log('Visualizing tensor: ', tensorName, tensor);
   let nestedArray = [];
   let pos = [];
@@ -378,10 +350,9 @@ function visualizeTensorHeatmap(
 }
 
 
-
 class NetworkRow {
   constructor(containerElem, id='', xStart=0, yStart=0, squareSize=20,
-              margin={top: 0, right: 0, bottom:0, left:0}) {
+      margin={top: 0, right: 0, bottom:0, left:0}) {
     this.containerElem = containerElem;
     this.xPos = 0;
     this.yPos = 0;
@@ -394,6 +365,13 @@ class NetworkRow {
     this.heatmaps = [];
     this.elementsConsumingTensors = [];
     this.margin = margin;
+
+    this.button = this.containerElem.append('button')
+        .attr('class', 'accordion')
+        .attr('id', id + 'Button')
+        .html(id)
+        .on('click', toggleShowRow);
+
     this.svg = this.containerElem.append('svg')
         .attr('class', 'networkRow')
         .attr('id', id)
@@ -401,9 +379,11 @@ class NetworkRow {
     this.g = this.svg.append('g')
         .attr('transform', 'translate(' + this.margin.left + ',' +
               this.margin.top + ')');
+
   }
 
-  updateDimensions(innerWidth=this.innerWidth, innerHeight=this.innerHeight) {
+  updateDimensions(
+      innerWidth=this.innerWidth, innerHeight=this.innerHeight) {
     this.outerWidth = innerWidth + this.margin.right + this.margin.left;
     this.outerHeight = innerHeight + this.margin.top + this.margin.bottom;
     this.g.attr('width', innerWidth).attr('height', innerHeight);
@@ -413,13 +393,13 @@ class NetworkRow {
   updateHeatmaps(tensors) {
     let nestedArray;
     for (let n=0; n < tensors.length; n++) {
-      console.log(this.heatmaps[n]);
+      // console.log(this.heatmaps[n]);
       if (this.heatmaps[n].transpose) {
         nestedArray = nestedArrayFrom2dTensor(tensors[n].transpose());
       } else {
         nestedArray = nestedArrayFrom2dTensor(tensors[n]);
       }
-      console.log(nestedArray);
+      // console.log(nestedArray);
       updateMatrix(nestedArray, this.elementsConsumingTensors[n]);
     } 
   }
@@ -455,20 +435,20 @@ class NetworkRow {
     // }
     // this.xPos = pos[0];
     // this.yPos = pos[1];
-    console.log(tensorName, this.innerHeight);
-    console.log(tensorName, this.innerHeight);
+    // console.log(tensorName, this.innerHeight);
+    // console.log(tensorName, this.innerHeight);
     return pos;
   }
 
-  padX(numPaddingSquares) {
-    this.xPos += numPaddingSquares * this.squareSize_;
-    this.innerWidth = this.xPos;
-  }
+  // padX(numPaddingSquares) {
+  //   this.xPos += numPaddingSquares * this.squareSize_;
+  //   this.innerWidth = this.xPos;
+  // }
 
-  padY(numPaddingSquares) {
-    this.yPos += numPaddingSquares * this.squareSize_; 
-    this.innerHeight = Math.max(this.innerHeight, this.yPos);
-  }
+  // padY(numPaddingSquares) {
+  //   this.yPos += numPaddingSquares * this.squareSize_; 
+  //   this.innerHeight = Math.max(this.innerHeight, this.yPos);
+  // }
 
   addPlus(width=50, margin=10, startingPos=[0,0]) {
     const plusContainer = this.g.append('g')
@@ -526,3 +506,17 @@ class NetworkRow {
   }
 }
 
+
+// Accordion for Layers viz
+function toggleShowRow() {
+  // Toggle between adding and removing the 'active' class
+  this.classList.toggle('active');
+  // Show or hide the referenced row
+  const row = document.getElementById(this.innerHTML);
+  if (row.style.display === 'block') {
+    row.style.display = 'none';
+  } else {
+    row.style.display = 'block';
+  }
+} 
+  
