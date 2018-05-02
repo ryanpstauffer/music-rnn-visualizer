@@ -104,6 +104,7 @@ function pitchNumbertoStaffNote(pitchNum) {
 
 export class TargetScore {
   constructor(containerId) {
+    this.containerId = containerId;
     this.score = document.getElementById(containerId);
     this.renderer = new VF.Renderer(this.score, VF.Renderer.Backends.SVG);
 
@@ -133,12 +134,10 @@ export class TargetScore {
   }
 
   clearScore() {
-    d3.select('#score').select('svg').selectAll('*').remove(); 
+    d3.select('#targetScore').select('svg').selectAll('*').remove(); 
     this.notes = [];
     this.stave = this.drawBlankStave();
-    this.tickContext.preFormat().setX(this.noteSpacing);
     this.lastPitch = {pitchClass: 'c', accidental: '', octave: '4'}; 
-    this.visibleNoteGroups = [];
   }
 
   // Input is a list of target pitch numbers

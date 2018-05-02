@@ -29,10 +29,14 @@ document.getElementById('build')
       let internalStateSize = parseInt(hiddenLayerSlider.value); 
       // Remove existing Visualization elements
       d3.select('.networkStages').selectAll('*').remove();
+      targetScore.clearScore();
+      targetScore.loaded = false; 
       // Create new Model and Visualization 
       rnn = new ForgetAllGatedRNN(
           internalStateSize, outputVectorSize, learningRate);
       viz = new RNNVisualization(rnn);
+      // Change button text
+      this.innerHTML = 'Reset Model';
     }, false);
 
 
@@ -86,6 +90,20 @@ const numCorrectValue = document.getElementById('numCorrect');
 const currentTimeStep = document.getElementById('currentTimeStep');
 const currentNumUpdates = document.getElementById('currentNumUpdates');
 
+
+// Update Progress bar and model visualization
+function updateVisualization(evalProgress) {
+    targetScore.recolorNotesFromProbs(evalProgress.correctProbs);
+    console.log(evalProgress);
+    currentLossValue.innerHTML = Math.round(evalProgress.loss * 1000) / 
+                                 1000;
+    numCorrectValue.innerHTML = evalProgress.numCorrect; 
+    currentTimeStep.innerHTML = parseInt(rnn.time); 
+    currentNumUpdates.innerHTML = parseInt(rnn.numTrainingUpdates);
+    viz.showWeights();
+}
+
+
 learnButton.addEventListener('click', function() {
   // Ensure that the targetMelody is loaded in the score
   if (targetScore.loaded == false) {
@@ -95,30 +113,53 @@ learnButton.addEventListener('click', function() {
     // "Step-through" mode
     // Execute a single step of training
     evalProgress = rnn.trainEpoch(targetMelody);
-    targetScore.recolorNotesFromProbs(evalProgress.correctProbs);
-    console.log(evalProgress);
-    currentLossValue.innerHTML = Math.round(evalProgress.loss * 1000) / 
-                                 1000;
-    numCorrectValue.innerHTML = evalProgress.numCorrect; 
-    currentTimeStep.innerHTML = parseInt(rnn.time); 
-    currentNumUpdates.innerHTML = parseInt(rnn.numTrainingUpdates);
-    viz.showWeights();
+    updateVisualization(evalProgress);
+    // targetScore.recolorNotesFromProbs(evalProgress.correctProbs);
+    // console.log(evalProgress);
+    // currentLossValue.innerHTML = Math.round(evalProgress.loss * 1000) / 
+    //                              1000;
+    // numCorrectValue.innerHTML = evalProgress.numCorrect; 
+    // currentTimeStep.innerHTML = parseInt(rnn.time); 
+    // currentNumUpdates.innerHTML = parseInt(rnn.numTrainingUpdates);
+    // viz.showWeights();
   } else if (parseInt(autoLearnSlider.value) == 1) {
     // "Auto-learn" mode
     // Execute training to completion
     // We set a ceiling on iterations, to avoid non-terminating loops
     // in cases of non-convergence
     // TODO: Need this to re-render
-    while (evalProgress.minCorrectProbability < targetProb &&
-           rnn.time < 5000) {
+    const delay = 10; // 100ms
+    const maxIterations = 2000;
+    function timeoutLoop() {
       evalProgress = rnn.trainEpoch(targetMelody, targetProb);
-      currentLossValue.innerHTML = Math.round(evalProgress.loss * 1000) /
-                                   1000;
-      numCorrectValue.innerHTML = evalProgress.numCorrect; 
-      currentTimeStep.innerHTML = parseInt(rnn.time); 
-      currentNumUpdates.innerHTML = parseInt(rnn.numTrainingUpdates);
-      viz.showWeights();
+      updateVisualization(evalProgress);
+      // currentLossValue.innerHTML = Math.round(evalProgress.loss * 1000) /
+      //                              1000;
+      // numCorrectValue.innerHTML = evalProgress.numCorrect; 
+      // currentTimeStep.innerHTML = parseInt(rnn.time); 
+      // currentNumUpdates.innerHTML = parseInt(rnn.numTrainingUpdates);
+      // viz.showWeights();
+      if (evalProgress.minCorrectProbability < targetProb &&
+           rnn.time < maxIterations) {
+        setTimeout(timeoutLoop, delay);
+      } else if (rnn.time > maxIterations) {
+        document.getElementById('warning').classList.toggle('hidden');
+      }
     }
+
+    setTimeout(timeoutLoop, delay);
+    // while (evalProgress.minCorrectProbability < targetProb &&
+    //        rnn.time < 2000) {
+    //   evalProgress = rnn.trainEpoch(targetMelody, targetProb);
+
+    //   // Update Progress bar and model visualization
+    //   currentLossValue.innerHTML = Math.round(evalProgress.loss * 1000) /
+    //                                1000;
+    //   numCorrectValue.innerHTML = evalProgress.numCorrect; 
+    //   currentTimeStep.innerHTML = parseInt(rnn.time); 
+    //   currentNumUpdates.innerHTML = parseInt(rnn.numTrainingUpdates);
+    //   viz.showWeights();
+    // }
   }
 }, false);
 
@@ -143,15 +184,17 @@ Tone.Transport.bpm.value = tempo.value;
 Tone.Transport.loopEnd = '4n';
 Tone.Transport.loop = true;
 
-const play = document.getElementById('playToggle');
-play.addEventListener('change', function(e) {
-  if (e.target.checked) {
+const playButton = document.getElementById('playButton');
+playButton.addEventListener('click', function() {
+  this.classList.toggle('playing');
+  if (this.classList.contains('playing')) {
     Tone.Transport.start();
+    this.innerHTML = '&#9724';
   } else {
     Tone.Transport.stop();
+    this.innerHTML = '&#x25b6';
   }
 }, false);
-
 
 // const topButton = document.getElementById('topRowButton');
 // topButton.onclick(showRow(topButton.innerHTML));

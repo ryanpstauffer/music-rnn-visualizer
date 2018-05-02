@@ -2,7 +2,9 @@
   <head>
     <title>Music RNN Visualizer</title>
     <link rel="shortcut icon" href="#" />
-    <link href="styles/style.css", rel="stylesheet" type="text/css">
+    <link href="styles/style.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+     rel="stylesheet">
     <script src="https://d3js.org/d3.v5.min.js" charset="utf-8"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.10.0"></script>
     <script src="third-party/Tone.min.js" charset="utf-8"></script>
@@ -40,38 +42,50 @@
               <span>Tempo</span>
               <input type="range" min="20" max="200" value="60" class="slider"
                id="tempoSlider">
-              <div class="playToggle">
-                <input type="checkbox" value="None" name="check"
-                 id="playToggle" />
-                <label for="playToggle" tabindex=1 ></label>
-              </div> 
+              <button id="playButton">&#x25b6</button>
             </div>
           </div> 
         </div>
       </div>
 
       <div id="networkVisualization">
-        <div id="progress">
-          <div id="loss">
-            <span>Current Loss:</span>
-            <span id="currentLoss" class="value">0</span>
-          </div>
-          <div id="correct">
-            <span>Number Correct:</span>
-            <span id="numCorrect" class="value">0</span>
-          </div>
-          <div id="timeStep">
-            <span>Current Time Step:</span>
-            <span id="currentTimeStep" class="value">0</span>
-          </div>
-          <div id="numUpdates">
-            <span>Number of Training Updates:</span>
-            <span id="currentNumUpdates" class="value">0</span>
-          </div>
-        </div>
-
+        <table id="progress">
+          <thead>
+            <tr>
+              <th id="loss" class="progressHeader"> 
+                <span>Current Loss</span>
+              </th>
+              <th id="correct" class="progressHeader"> 
+                <span>Number Correct</span>
+              </th>
+              <th id="timeStep" class="progressHeader">
+                <span>Current Time Step</span>
+              </th>
+              <th id="numUpdates" class="progressHeader">
+                <span>Number of Training Updates</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="progressValue">
+              <td>
+                <span id="currentLoss">0</span>
+              </td>
+              <td>
+                <span id="numCorrect">0</span>
+              </td>
+              <td>
+                <span id="currentTimeStep">0</span>
+              </td>
+              <td>
+                <span id="currentNumUpdates">0</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <span id="warning" class="hidden">Warning: Model did not converge</span>
         <div class="networkStages" height="800px" width="100%"></div>
-        <div id="outputKeyboard" class="hidden" width="800px"
+        <div id="outputKeyboard" class="hidden" width="600px"
          height="200px"></div>
         <div id="targetScore"></div>
       </div>
