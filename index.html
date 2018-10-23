@@ -1,12 +1,12 @@
 <html>
   <head>
     <title>Music RNN Visualizer</title>
-    <link rel="shortcut icon" href="#" />
+    <link rel="shortcut icon" type="image/png" href="images/favicon.png"/>
     <link href="styles/style.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
      rel="stylesheet">
     <script src="https://d3js.org/d3.v5.min.js" charset="utf-8"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.10.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.13.0"></script>
     <script src="third-party/Tone.min.js" charset="utf-8"></script>
     <script src="third-party/vexflow-min.js" charset="utf-8"></script>
     <script src="scripts/keyboard_element.js" charset="utf-8"></script>
@@ -44,7 +44,7 @@
                id="tempoSlider">
               <button id="playButton">&#x25b6</button>
             </div>
-          </div> 
+          </div>
         </div>
       </div>
 
@@ -52,10 +52,10 @@
         <table id="progress">
           <thead>
             <tr>
-              <th id="loss" class="progressHeader"> 
+              <th id="loss" class="progressHeader">
                 <span>Current Loss</span>
               </th>
-              <th id="correct" class="progressHeader"> 
+              <th id="correct" class="progressHeader">
                 <span>Number Correct</span>
               </th>
               <th id="timeStep" class="progressHeader">
