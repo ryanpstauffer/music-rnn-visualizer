@@ -17,7 +17,7 @@ hiddenLayerValue.innerHTML = hiddenLayerSlider.value;
 
 // Update slider value
 hiddenLayerSlider.oninput = function() {
-  hiddenLayerValue.innerHTML = this.value; 
+  hiddenLayerValue.innerHTML = this.value;
 }
 
 let rnn, viz;
@@ -26,12 +26,12 @@ let rnn, viz;
 // buildButton.addEventListener('click', function() {
 document.getElementById('build')
     .addEventListener('click', function() {
-      let internalStateSize = parseInt(hiddenLayerSlider.value); 
+      let internalStateSize = parseInt(hiddenLayerSlider.value);
       // Remove existing Visualization elements
       d3.select('.networkStages').selectAll('*').remove();
       targetScore.clearScore();
-      targetScore.loaded = false; 
-      // Create new Model and Visualization 
+      targetScore.loaded = false;
+      // Create new Model and Visualization
       rnn = new ForgetAllGatedRNN(
           internalStateSize, outputVectorSize, learningRate);
       viz = new RNNVisualization(rnn);
@@ -45,18 +45,19 @@ document.getElementById('build')
 
 // Keyboard
 // Define synth
+// TODO: Improve synth sound...
 let synth = new Tone.Synth().toMaster();
 let targetMelody = [];
 
 const score = new MelodyScore('score');
 
 const keyboardContainer = document.querySelector('#inputKeyboard');
-const keyboardInterface = new KeyboardElement(keyboardContainer); 
+const keyboardInterface = new KeyboardElement(keyboardContainer);
 
 const targetScore = new TargetScore('targetScore');
 
 d3.selectAll('.key')
-    .on('mousedown', function() { 
+    .on('mousedown', function() {
       keyboardInterface.keyDown(this.id);
       synth.triggerAttack(pitchNumberToNote(this.id));
       // Add warning for targetMelody length?
@@ -95,10 +96,10 @@ const currentNumUpdates = document.getElementById('currentNumUpdates');
 function updateVisualization(evalProgress) {
     targetScore.recolorNotesFromProbs(evalProgress.correctProbs);
     console.log(evalProgress);
-    currentLossValue.innerHTML = Math.round(evalProgress.loss * 1000) / 
+    currentLossValue.innerHTML = Math.round(evalProgress.loss * 1000) /
                                  1000;
-    numCorrectValue.innerHTML = evalProgress.numCorrect; 
-    currentTimeStep.innerHTML = parseInt(rnn.time); 
+    numCorrectValue.innerHTML = evalProgress.numCorrect;
+    currentTimeStep.innerHTML = parseInt(rnn.time);
     currentNumUpdates.innerHTML = parseInt(rnn.numTrainingUpdates);
     viz.showWeights();
 }
@@ -113,13 +114,14 @@ learnButton.addEventListener('click', function() {
     // "Step-through" mode
     // Execute a single step of training
     evalProgress = rnn.trainEpoch(targetMelody);
+    console.log(targetMelody);
     updateVisualization(evalProgress);
     // targetScore.recolorNotesFromProbs(evalProgress.correctProbs);
     // console.log(evalProgress);
-    // currentLossValue.innerHTML = Math.round(evalProgress.loss * 1000) / 
+    // currentLossValue.innerHTML = Math.round(evalProgress.loss * 1000) /
     //                              1000;
-    // numCorrectValue.innerHTML = evalProgress.numCorrect; 
-    // currentTimeStep.innerHTML = parseInt(rnn.time); 
+    // numCorrectValue.innerHTML = evalProgress.numCorrect;
+    // currentTimeStep.innerHTML = parseInt(rnn.time);
     // currentNumUpdates.innerHTML = parseInt(rnn.numTrainingUpdates);
     // viz.showWeights();
   } else if (parseInt(autoLearnSlider.value) == 1) {
@@ -135,8 +137,8 @@ learnButton.addEventListener('click', function() {
       updateVisualization(evalProgress);
       // currentLossValue.innerHTML = Math.round(evalProgress.loss * 1000) /
       //                              1000;
-      // numCorrectValue.innerHTML = evalProgress.numCorrect; 
-      // currentTimeStep.innerHTML = parseInt(rnn.time); 
+      // numCorrectValue.innerHTML = evalProgress.numCorrect;
+      // currentTimeStep.innerHTML = parseInt(rnn.time);
       // currentNumUpdates.innerHTML = parseInt(rnn.numTrainingUpdates);
       // viz.showWeights();
       if (evalProgress.minCorrectProbability < targetProb &&
@@ -155,8 +157,8 @@ learnButton.addEventListener('click', function() {
     //   // Update Progress bar and model visualization
     //   currentLossValue.innerHTML = Math.round(evalProgress.loss * 1000) /
     //                                1000;
-    //   numCorrectValue.innerHTML = evalProgress.numCorrect; 
-    //   currentTimeStep.innerHTML = parseInt(rnn.time); 
+    //   numCorrectValue.innerHTML = evalProgress.numCorrect;
+    //   currentTimeStep.innerHTML = parseInt(rnn.time);
     //   currentNumUpdates.innerHTML = parseInt(rnn.numTrainingUpdates);
     //   viz.showWeights();
     // }
@@ -168,7 +170,7 @@ learnButton.addEventListener('click', function() {
 // Update tempo value from slider
 const tempo = document.getElementById('tempoSlider');
 tempo.oninput = function() {
-  Tone.Transport.bpm.value = parseInt(this.value); 
+  Tone.Transport.bpm.value = parseInt(this.value);
 }
 
 let pitch;

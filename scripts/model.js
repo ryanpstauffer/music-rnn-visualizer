@@ -20,21 +20,21 @@ export class ForgetAllGatedRNN {
     // Perform initializations for our RNN
     // Initialize cell internal state
     this.internalState = tf.variable(tf.zeros([this.internalStateSize, 1]));
-  
+
     // Initialize Weight matrics
     this.W = tf.variable(tf.randomNormal(
         [this.internalStateSize, this.internalStateSize], 0, 0.01));
- 
+
     this.U = tf.variable(tf.randomNormal(
         [this.internalStateSize, this.outputVectorSize], 0, 0.01));
 
     this.V = tf.variable(tf.randomNormal(
-        [this.outputVectorSize, this.internalStateSize], 0, 0.01)); 
+        [this.outputVectorSize, this.internalStateSize], 0, 0.01));
 
     // Initialize bias vectors
     this.b = tf.variable(tf.zeros([this.internalStateSize, 1]));
     this.c = tf.variable(tf.zeros([this.outputVectorSize, 1]));
- 
+
     // Initialize intermediate matrices and vectors for visualization
     this.a = tf.variable(tf.zeros([this.internalStateSize, 1]));
     this.forgetGate = tf.variable(tf.zeros([this.internalStateSize, 1]));
@@ -50,24 +50,24 @@ export class ForgetAllGatedRNN {
 
     // Prepare for next step
     this.lastOutput = tf.oneHot(probs.argMax(), this.outputVectorSize)
-                        .reshape([this.outputVectorSize, 1]); 
+                        .reshape([this.outputVectorSize, 1]);
     // Note that our time counter records the timestep of the
     // last completed output
     this.time++;
 
     return probs;
-  } 
+  }
 
   // Generate values from the network
   // TODO: placeholder for delivery of values to viz
   generate(numSteps) {
     for (let n = 0; n < numSteps; n++) {
-      let probs = this.step(); 
+      let probs = this.step();
       let output = probs.argMax().dataSync();
       console.log(output);
     }
   }
- 
+
   getLastOutputAsPitch() {
     return pitchNumberToNote(this.lastOutput.argMax().dataSync()[0] + 60);
   }
@@ -96,13 +96,13 @@ export class ForgetAllGatedRNN {
       // After 4 timesteps, we've generated enough outputs
       // to match targets
       // So let's backprop and update!
-    let evalProgress = {}; 
+    let evalProgress = {};
     if (this.time % this.loopLength == 0) {
       console.log('TRAINING');
       let gradients = this.calcGradients_(
         unrolled.internalStates, unrolled.lastOutputs,
         unrolled.probs, targetOutputs);
-      this.updateParameters_(gradients); 
+      this.updateParameters_(gradients);
       this.numTrainingUpdates++;
 
       // Evaluate
@@ -119,21 +119,21 @@ export class ForgetAllGatedRNN {
       }
       let correctProbs = correctProbsBuf.toTensor();
       evalProgress.correctProbs = correctProbs.clone().dataSync();
-       
+
       // console.log(evalProgress.correctProbs);
       evalProgress.minCorrectProbability = Math.min(
           ...evalProgress.correctProbs);
-      console.log('Minimum correct probability: ', 
+      console.log('Minimum correct probability: ',
                   evalProgress.minCorrectProbability);
-       
+
       evalProgress.correct = evalProgress.correctProbs.map(
           x => x > targetProb);
       evalProgress.numCorrect = evalProgress.correct.reduce(
           (a, b) => a + b, 0);
     }
 
-    return evalProgress; 
-  } 
+    return evalProgress;
+  }
 
   // Train the network cell until targetProbability is reached.
   // targetOutput: a vector with length that matches loop length.
@@ -157,7 +157,7 @@ export class ForgetAllGatedRNN {
     for (let t = 1; t < this.loopLength + 1; t++) {
       loss.assign(
         loss.sub(tf.log(tf.scalar(probs[t].get(targetOutputs[t-1], 0)))));
-    } 
+    }
 
     // Setup
     const d_W = tf.variable(tf.zerosLike(this.W));
@@ -172,10 +172,12 @@ export class ForgetAllGatedRNN {
     for (let t = this.loopLength; t > 0; t--) {
       // The gradient w.r.t. output function
       d_logits.assign(
-        probs[t].sub(tf.oneHot(
-            tf.scalar(targetOutputs[t-1], 'int32'),
-            this.outputVectorSize)
-          .reshape([this.outputVectorSize, 1])));
+        probs[t].sub(tf.cast(
+            tf.oneHot(
+                tf.tensor1d([targetOutputs[t-1]], 'int32'),
+                this.outputVectorSize)
+                .reshape([this.outputVectorSize, 1]),
+            'float32')));
 
       // Gradients in output function
       // y_t = V * h_t + c
@@ -206,13 +208,13 @@ export class ForgetAllGatedRNN {
             d_a.matMul(lastOutputs[t-1].transpose())));
 
         d_b.assign(d_b.add(d_a));
-      
+
         d_nextState.assign(
           tf.matMul(this.W.transpose(), d_a));
       }
     }
- 
-    // Finalize gradients object 
+
+    // Finalize gradients object
     let gradients = {
       loss: loss,
       d_W: d_W,
@@ -243,10 +245,11 @@ export class ForgetAllGatedRNN {
 
 
   updateInternalState_() {
+    // HERE'S MY ERROR!
     this.a.assign(this.W.matMul(this.internalState).add(
                 this.U.matMul(this.lastOutput)).add(
                 this.b));
-    if (this.time % 4 == 0) {
+    if (this.time % this.loopLength == 0) {
       this.forgetGate.assign(tf.fill([this.internalStateSize, 1], 0));
     } else {
       this.forgetGate.assign(tf.fill([this.internalStateSize, 1], 1));
@@ -265,7 +268,6 @@ export class ForgetAllGatedRNN {
     console.log('U:', this.U.toString());
     console.log('V:', this.V.toString());
     console.log('b:', this.b.toString());
-    console.log('c:', this.c.toString()); 
+    console.log('c:', this.c.toString());
   }
 }
-
